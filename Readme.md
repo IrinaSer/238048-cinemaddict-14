@@ -1,7 +1,7 @@
 # Проект «Киноман»
 
 * Студент: [Ирина Пухкая](https://up.htmlacademy.ru/ecmascript/14/user/238048).
-* Наставник: `Неизвестно`.
+* Наставник: [Иван Шалагин](https://htmlacademy.ru/profile/id386947).
 
 ---
 
