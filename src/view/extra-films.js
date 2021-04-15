@@ -4,4 +4,4 @@ export const createExtraFilmsTemplate = (title) => {
 
     <div class="films-list__container"></div>
   </section>`;
-}
+};

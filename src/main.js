@@ -4,7 +4,7 @@ import {createFilmsTemplate} from './view/films.js';
 import {createLoadMoreButtonTemplate} from './view/load-more-button.js';
 import {createExtraFilmsTemplate} from './view/extra-films.js';
 import {createUserTemplate} from './view/site-user.js';
-import {createPopupTemplate} from './view/popup.js'
+import {createPopupTemplate} from './view/popup.js';
 
 const MOVIE_COUNT = 5;
 const EXTRA_MOVIE_COUNT = 2;
