@@ -38,7 +38,8 @@ for (let i = 0; i < EXTRA_MOVIE_COUNT; i++) {
 }
 
 render(filmsElement, createExtraFilmsTemplate('Most commented'), 'beforeend');
-const commentedFilmsContainerElement = filmsElement.querySelectorAll('.films-list--extra')[filmsElement.querySelectorAll('.films-list--extra').length - 1];
+const extraFilmsContainerElements = filmsElement.querySelectorAll('.films-list--extra');
+const commentedFilmsContainerElement = extraFilmsContainerElements[extraFilmsContainerElements.length - 1];
 const commentedFilmsListContainerElement = commentedFilmsContainerElement.querySelector('.films-list__container');
 
 for (let i = 0; i < EXTRA_MOVIE_COUNT; i++) {
