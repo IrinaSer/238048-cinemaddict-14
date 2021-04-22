@@ -1,3 +1,4 @@
+import dayjs from 'dayjs';
 // Источник - https://github.com/you-dont-need/You-Dont-Need-Lodash-Underscore#_random
 const getRandomInteger = (a = 0, b = 1) => {
   const lower = Math.ceil(Math.min(a, b));
@@ -97,15 +98,36 @@ const generateGenre = () => {
   return genres[randomIndex];
 };
 
+const generateDate = () => {
+  const day = getRandomInteger(1, 30);
+  const month = getRandomInteger(1, 12);
+  const year = getRandomInteger(1900, 1970);
+  const date = new Date(year, month, day);
+
+  return dayjs(date).format('D MMMM YYYY');
+};
+
 export const generateMovie = () => {
+  const genresCount = getRandomInteger(0, 3);
+
   return {
     poster: generatePoster(),
     title: generateTitle(),
     rating: generateRating(),
-    year: getRandomInteger(1900, 1970),
+    releaseYear: getRandomInteger(1900, 1970),
     duration: generateDuration(),
     genre: generateGenre(),
     description: generateDescription(),
     commentsCount: getRandomInteger(0, 5),
+    fullPoster: generatePoster(),
+    originalTitle: generateTitle(),
+    director: 'Robert B. Weide',
+    writers: 'Anne Wigton, Heinz Herald, Richard Weil',
+    actors: 'Erich von Stroheim, Mary Beth Hughes, Dan Duryea',
+    releaseDate: generateDate(),
+    country: 'USA',
+    genres: new Array(genresCount).fill().map(generateGenre),
+    fullDescription: 'The film opens following a murder at a cabaret in Mexico City in 1936, and then presents the events leading up to it in flashback. The Great Flamarion (Erich von Stroheim) is an arrogant, friendless, and misogynous marksman who displays his trick gunshot act in the vaudeville circuit. His show features a beautiful assistant, Connie (Mary Beth Hughes) and her drunken husband Al (Dan Duryea), Flamarion`s other assistant. Flamarion falls in love with Connie, the movie`s femme fatale, and is soon manipulated by her into killing her no good husband during one of their acts.',
+    ageRating: getRandomInteger(0, 21),
   };
 };
