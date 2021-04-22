@@ -8,7 +8,8 @@ import {createPopupTemplate} from './view/popup.js';
 import {generateMovie} from './mock/movie.js';
 import {generateFilter} from './mock/filter.js';
 
-const MOVIE_COUNT = 5;
+const MOVIE_COUNT = 20;
+const MOVIE_COUNT_PER_STEP = 5;
 const EXTRA_MOVIE_COUNT = 2;
 
 const render = (container, template, place) => {
@@ -28,11 +29,30 @@ const filmsElement = siteMainElement.querySelector('.films');
 const filmsListElement = filmsElement.querySelector('.films-list');
 const filmsListContainerElement = filmsListElement.querySelector('.films-list__container');
 
-for (let i = 0; i < MOVIE_COUNT; i++) {
+for (let i = 0; i < Math.min(movies.length, MOVIE_COUNT_PER_STEP); i++) {
   render(filmsListContainerElement, createListMovieCardTemplate(movies[i]), 'beforeend');
 }
 
-render(filmsListElement, createLoadMoreButtonTemplate(), 'beforeend');
+if (movies.length > MOVIE_COUNT_PER_STEP) {
+  let renderedMovieCount = MOVIE_COUNT_PER_STEP;
+
+  render(filmsListElement, createLoadMoreButtonTemplate(), 'beforeend');
+
+  const loadMoreButton = filmsListElement.querySelector('.films-list__show-more');
+
+  loadMoreButton.addEventListener('click', (evt) => {
+    evt.preventDefault();
+    movies
+      .slice(renderedMovieCount, renderedMovieCount + MOVIE_COUNT_PER_STEP)
+      .forEach((movie) => render(filmsListContainerElement, createListMovieCardTemplate(movie), 'beforeend'));
+
+    renderedMovieCount += MOVIE_COUNT_PER_STEP;
+
+    if (renderedMovieCount >= movies.length) {
+      loadMoreButton.remove();
+    }
+  });
+}
 render(filmsElement, createExtraFilmsTemplate('Top rated'), 'beforeend');
 
 const topFilmsContainerElement = filmsElement.querySelector('.films-list--extra');
