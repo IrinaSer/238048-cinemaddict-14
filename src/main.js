@@ -54,4 +54,4 @@ for (let i = 0; i < EXTRA_MOVIE_COUNT; i++) {
 }
 
 render(siteHeaderElement, createUserTemplate(), 'beforeend');
-render(siteMainElement, createPopupTemplate(), 'beforeend');
+render(siteMainElement, createPopupTemplate(movies[1]), 'beforeend');
