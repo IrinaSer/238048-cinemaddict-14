@@ -6,6 +6,7 @@ import {createExtraFilmsTemplate} from './view/extra-films.js';
 import {createUserTemplate} from './view/site-user.js';
 import {createPopupTemplate} from './view/popup.js';
 import {generateMovie} from './mock/movie.js';
+import {generateFilter} from './mock/filter.js';
 
 const MOVIE_COUNT = 5;
 const EXTRA_MOVIE_COUNT = 2;
@@ -15,11 +16,12 @@ const render = (container, template, place) => {
 };
 
 const movies = new Array(MOVIE_COUNT).fill().map(generateMovie);
+const filters = generateFilter(movies);
 
 const siteMainElement = document.querySelector('.main');
 const siteHeaderElement = document.querySelector('.header');
 
-render(siteMainElement, createSiteMenuTemplate(), 'beforeend');
+render(siteMainElement, createSiteMenuTemplate(filters), 'beforeend');
 render(siteMainElement, createFilmsTemplate(), 'beforeend');
 
 const filmsElement = siteMainElement.querySelector('.films');
