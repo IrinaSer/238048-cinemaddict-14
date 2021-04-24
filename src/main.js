@@ -8,6 +8,7 @@ import LoadMoreButtonView from './view/load-more-button.js';
 import StatisticsView from './view/statistics.js';
 import MovieCardView from './view/list-movie-card.js';
 import PopupView from './view/popup.js';
+import NoFilmView from './view/no-film.js';
 import { generateMovie } from './mock/movie.js';
 import { generateFilter } from './mock/filter.js';
 import { render, RenderPosition } from './utils.js';
@@ -70,7 +71,16 @@ const renderMovies = (moviesContainer, movies) => {
   const filmsComponent = new FilmsView();
   const filmsListComponent = new FilmsListView('All movies. Upcoming');
   const filmsListContainerComponent = new FilmsListContainerView();
+
+  if (movies.length === 0) {
+    render(moviesContainer, filmsComponent.getElement(), RenderPosition.BEFOREEND);
+    render(filmsComponent.getElement(), new NoFilmView().getElement(), RenderPosition.BEFOREEND);
+    return;
+  }
+
+  render(siteMainElement, new SortingView().getElement(), RenderPosition.BEFOREEND);
   render(moviesContainer, filmsComponent.getElement(), RenderPosition.BEFOREEND);
+
   render(filmsComponent.getElement(), filmsListComponent.getElement(), RenderPosition.BEFOREEND);
   render(filmsListComponent.getElement(), filmsListContainerComponent.getElement(), RenderPosition.BEFOREEND);
 
@@ -124,7 +134,6 @@ const renderMovies = (moviesContainer, movies) => {
 };
 
 render(siteMainElement, new SiteMenuView(filters).getElement(), RenderPosition.AFTERBEGIN);
-render(siteMainElement, new SortingView().getElement(), RenderPosition.BEFOREEND);
 
 renderMovies(siteMainElement, movies);
 
