@@ -1,3 +1,5 @@
+import {createElement} from '../utils.js';
+
 const createFilterItemTemplate = (filter) => {
   const {filterName, count} = filter;
   const formatFilterName = (str) => {
@@ -11,7 +13,7 @@ ${filterName === 'all' ? 'All movies' : `${formatFilterName(filterName)}  <span 
   );
 };
 
-export const createSiteMenuTemplate = (filterItems) => {
+const createSiteMenuTemplate = (filterItems) => {
   const filterItemsTemplate = filterItems
     .map((filter) => createFilterItemTemplate(filter))
     .join('');
@@ -23,3 +25,26 @@ export const createSiteMenuTemplate = (filterItems) => {
   <a href="#stats" class="main-navigation__additional">Stats</a>
 </nav>`;
 };
+
+export default class SiteMenu {
+  constructor(filters) {
+    this._element = null;
+    this._filters = filters;
+  }
+
+  getTemplate() {
+    return createSiteMenuTemplate(this._filters);
+  }
+
+  getElement() {
+    if (!this._element) {
+      this._element = createElement(this.getTemplate());
+    }
+
+    return this._element;
+  }
+
+  removeElement() {
+    this._element = null;
+  }
+}
