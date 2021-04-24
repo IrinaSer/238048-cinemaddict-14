@@ -13,10 +13,6 @@ const getRandomFloat = (a = 1, b = 0) => {
   return lower + Math.random() * (upper - lower);
 };
 
-const renderTemplate = (container, template, place) => {
-  container.insertAdjacentHTML(place, template);
-};
-
 const RenderPosition = {
   AFTERBEGIN: 'afterbegin',
   BEFOREEND: 'beforeend',
@@ -45,4 +41,4 @@ const formatName = (str) => {
   return str[0].toUpperCase() + str.slice(1);
 };
 
-export {getRandomInteger, getRandomFloat, renderTemplate, RenderPosition, renderElement, createElement, formatName};
+export {getRandomInteger, getRandomFloat, RenderPosition, renderElement, createElement, formatName};

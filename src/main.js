@@ -1,16 +1,16 @@
 import SiteMenuView from './view/site-menu.js';
 import UserView from './view/site-user.js';
 import SortingView from './view/sorting.js';
-import {createListMovieCardTemplate} from './view/list-movie-card.js';
 import FilmsView from './view/films.js';
 import FilmsListView from './view/films-list.js';
 import FilmsListContainerView from './view/film-list-container.js';
 import LoadMoreButtonView from './view/load-more-button.js';
 import StatisticsView from './view/statistics.js';
+import MovieCardView from './view/list-movie-card.js';
 import PopupView from './view/popup.js';
 import {generateMovie} from './mock/movie.js';
 import {generateFilter} from './mock/filter.js';
-import {renderTemplate, renderElement, RenderPosition} from './utils.js';
+import {renderElement, RenderPosition} from './utils.js';
 
 const MOVIE_COUNT = 20;
 const MOVIE_COUNT_PER_STEP = 5;
@@ -35,7 +35,7 @@ renderElement(filmsComponent.getElement(), filmsListComponent.getElement(), Rend
 renderElement(filmsListComponent.getElement(), filmsListContainerComponent.getElement(), RenderPosition.BEFOREEND);
 
 for (let i = 0; i < Math.min(movies.length, MOVIE_COUNT_PER_STEP); i++) {
-  renderTemplate(filmsListContainerComponent.getElement(), createListMovieCardTemplate(movies[i]), 'beforeend');
+  renderElement(filmsListContainerComponent.getElement(), new MovieCardView(movies[i]).getElement(), 'beforeend');
 }
 
 if (movies.length > MOVIE_COUNT_PER_STEP) {
@@ -49,7 +49,7 @@ if (movies.length > MOVIE_COUNT_PER_STEP) {
     evt.preventDefault();
     movies
       .slice(renderedMovieCount, renderedMovieCount + MOVIE_COUNT_PER_STEP)
-      .forEach((movie) => renderTemplate(filmsListContainerComponent.getElement(), createListMovieCardTemplate(movie), 'beforeend'));
+      .forEach((movie) => renderElement(filmsListContainerComponent.getElement(), new MovieCardView(movie).getElement(), 'beforeend'));
 
     renderedMovieCount += MOVIE_COUNT_PER_STEP;
 
@@ -68,7 +68,7 @@ renderElement(ratedFilmsListComponent.getElement(), ratedFilmsListContainerCompo
 const topMovies = new Array(EXTRA_MOVIE_COUNT).fill().map(generateMovie);
 
 for (let i = 0; i < EXTRA_MOVIE_COUNT; i++) {
-  renderTemplate(ratedFilmsListContainerComponent.getElement(), createListMovieCardTemplate(topMovies[i]), 'beforeend');
+  renderElement(ratedFilmsListContainerComponent.getElement(), new MovieCardView(topMovies[i]).getElement(), 'beforeend');
 }
 
 const commentedFilmsListComponent = new FilmsListView('Most commented', true);
@@ -79,7 +79,7 @@ renderElement(commentedFilmsListComponent.getElement(), commentedFilmsListContai
 const commentedMovies = new Array(EXTRA_MOVIE_COUNT).fill().map(generateMovie);
 
 for (let i = 0; i < EXTRA_MOVIE_COUNT; i++) {
-  renderTemplate(commentedFilmsListContainerComponent.getElement(), createListMovieCardTemplate(commentedMovies[i]), 'beforeend');
+  renderElement(commentedFilmsListContainerComponent.getElement(), new MovieCardView(commentedMovies[i]).getElement(), 'beforeend');
 }
 
 renderElement(siteFooterStatisticElement, new StatisticsView(movies.length).getElement(), RenderPosition.BEFOREEND);
