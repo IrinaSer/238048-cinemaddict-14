@@ -40,4 +40,9 @@ const createElement = (template) => {
   return newElement.firstChild;
 };
 
-export {getRandomInteger, getRandomFloat, renderTemplate, RenderPosition, renderElement, createElement};
+const formatName = (str) => {
+  if (!str) return str;
+  return str[0].toUpperCase() + str.slice(1);
+};
+
+export {getRandomInteger, getRandomFloat, renderTemplate, RenderPosition, renderElement, createElement, formatName};
