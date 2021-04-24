@@ -27,25 +27,41 @@ render(siteHeaderElement, new UserView().getElement(), RenderPosition.BEFOREEND)
 
 const renderMovie = (movieListElement, movie) => {
   const movieComponent = new MovieCardView(movie);
-  const movieDetailInfoComponent = new PopupView(movie);
 
   const moviePoster = movieComponent.getElement().querySelector('.film-card__poster');
   const movieTitle = movieComponent.getElement().querySelector('.film-card__title');
   const movieComments = movieComponent.getElement().querySelector('.film-card__comments');
-  const detailInfoCloseButton = movieDetailInfoComponent.getElement().querySelector('.film-details__close-btn');
 
   const showDetailInfoPopup = () => {
+    const movieDetailInfoComponent = new PopupView(movie);
+    const detailInfoCloseButton = movieDetailInfoComponent.getElement().querySelector('.film-details__close-btn');
+
+    const onEscKeyDown = (evt) => {
+      if (evt.key === 'Escape' || evt.key === 'Esc') {
+        evt.preventDefault();
+        hideDetailInfoPopup(movieDetailInfoComponent.getElement());
+        document.removeEventListener('keydown', onEscKeyDown);
+      }
+    };
+
+    const onPopupCloseHandler = () => {
+      hideDetailInfoPopup(movieDetailInfoComponent.getElement());
+      detailInfoCloseButton.removeEventListener('click', onPopupCloseHandler);
+      document.removeEventListener('keydown', onEscKeyDown);
+    };
+
     siteMainElement.appendChild(movieDetailInfoComponent.getElement());
+    document.addEventListener('keydown', onEscKeyDown);
+    detailInfoCloseButton.addEventListener('click', onPopupCloseHandler);
   };
 
-  const hideDetailInfoPopup = () => {
-    siteMainElement.removeChild(movieDetailInfoComponent.getElement());
+  const hideDetailInfoPopup = (element) => {
+    siteMainElement.removeChild(element);
   };
 
   moviePoster.addEventListener('click', showDetailInfoPopup);
   movieTitle.addEventListener('click', showDetailInfoPopup);
   movieComments.addEventListener('click', showDetailInfoPopup);
-  detailInfoCloseButton.addEventListener('click', hideDetailInfoPopup);
 
   render(movieListElement, movieComponent.getElement(), RenderPosition.BEFOREEND);
 };
