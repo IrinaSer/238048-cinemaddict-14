@@ -26,6 +26,32 @@ const siteFooterStatisticElement = document.querySelector('.footer__statistics')
 render(siteHeaderElement, new UserView().getElement(), RenderPosition.BEFOREEND);
 render(siteMainElement, new SortingView().getElement(), RenderPosition.BEFOREEND);
 
+const renderMovie = (movieListElement, movie) => {
+  const movieComponent = new MovieCardView(movie);
+  const movieDetailInfoComponent = new PopupView(movie);
+
+  const moviePoster = movieComponent.getElement().querySelector('.film-card__poster');
+  const movieTitle = movieComponent.getElement().querySelector('.film-card__title');
+  const movieComments = movieComponent.getElement().querySelector('.film-card__comments');
+  const detailInfoCloseButton = movieDetailInfoComponent.getElement().querySelector('.film-details__close-btn');
+
+  const showDetailInfoPopup = () => {
+    siteMainElement.appendChild(movieDetailInfoComponent.getElement());
+  };
+
+  const hideDetailInfoPopup = () => {
+    siteMainElement.removeChild(movieDetailInfoComponent.getElement());
+  };
+
+  moviePoster.addEventListener('click', showDetailInfoPopup);
+  movieTitle.addEventListener('click', showDetailInfoPopup);
+  movieComments.addEventListener('click', showDetailInfoPopup);
+  detailInfoCloseButton.addEventListener('click', hideDetailInfoPopup);
+
+  render(movieListElement, movieComponent.getElement(), RenderPosition.BEFOREEND);
+};
+
+
 const filmsComponent = new FilmsView();
 const filmsListComponent = new FilmsListView('All movies. Upcoming');
 const filmsListContainerComponent = new FilmsListContainerView();
@@ -35,7 +61,7 @@ render(filmsComponent.getElement(), filmsListComponent.getElement(), RenderPosit
 render(filmsListComponent.getElement(), filmsListContainerComponent.getElement(), RenderPosition.BEFOREEND);
 
 for (let i = 0; i < Math.min(movies.length, MOVIE_COUNT_PER_STEP); i++) {
-  render(filmsListContainerComponent.getElement(), new MovieCardView(movies[i]).getElement(), 'beforeend');
+  renderMovie(filmsListContainerComponent.getElement(), movies[i]);
 }
 
 if (movies.length > MOVIE_COUNT_PER_STEP) {
@@ -49,7 +75,7 @@ if (movies.length > MOVIE_COUNT_PER_STEP) {
     evt.preventDefault();
     movies
       .slice(renderedMovieCount, renderedMovieCount + MOVIE_COUNT_PER_STEP)
-      .forEach((movie) => render(filmsListContainerComponent.getElement(), new MovieCardView(movie).getElement(), 'beforeend'));
+      .forEach((movie) => renderMovie(filmsListContainerComponent.getElement(), movie));
 
     renderedMovieCount += MOVIE_COUNT_PER_STEP;
 
@@ -68,7 +94,7 @@ render(ratedFilmsListComponent.getElement(), ratedFilmsListContainerComponent.ge
 const topMovies = new Array(EXTRA_MOVIE_COUNT).fill().map(generateMovie);
 
 for (let i = 0; i < EXTRA_MOVIE_COUNT; i++) {
-  render(ratedFilmsListContainerComponent.getElement(), new MovieCardView(topMovies[i]).getElement(), 'beforeend');
+  renderMovie(ratedFilmsListContainerComponent.getElement(), topMovies[i]);
 }
 
 const commentedFilmsListComponent = new FilmsListView('Most commented', true);
@@ -79,8 +105,7 @@ render(commentedFilmsListComponent.getElement(), commentedFilmsListContainerComp
 const commentedMovies = new Array(EXTRA_MOVIE_COUNT).fill().map(generateMovie);
 
 for (let i = 0; i < EXTRA_MOVIE_COUNT; i++) {
-  render(commentedFilmsListContainerComponent.getElement(), new MovieCardView(commentedMovies[i]).getElement(), 'beforeend');
+  renderMovie(commentedFilmsListContainerComponent.getElement(), commentedMovies[i]);
 }
 
 render(siteFooterStatisticElement, new StatisticsView(movies.length).getElement(), RenderPosition.BEFOREEND);
-render(siteMainElement, new PopupView(movies[1]).getElement(), RenderPosition.BEFOREEND);
