@@ -18,7 +18,7 @@ const RenderPosition = {
   BEFOREEND: 'beforeend',
 };
 
-const renderElement = (container, element, place) => {
+const render = (container, element, place) => {
   switch (place) {
     case RenderPosition.AFTERBEGIN:
       container.prepend(element);
@@ -41,4 +41,4 @@ const formatName = (str) => {
   return str[0].toUpperCase() + str.slice(1);
 };
 
-export {getRandomInteger, getRandomFloat, RenderPosition, renderElement, createElement, formatName};
+export {getRandomInteger, getRandomFloat, RenderPosition, render, createElement, formatName};
