@@ -83,9 +83,10 @@ const generateDate = () => {
 
 export const generateMovie = () => {
   const genresCount = getRandomInteger(0, 3);
+  const poster = generateRandomData(images);
 
   return {
-    poster: generateRandomData(images),
+    poster: poster,
     title: generateRandomData(titles),
     rating: generateRating(),
     releaseYear: getRandomInteger(1900, 1970),
@@ -93,7 +94,7 @@ export const generateMovie = () => {
     genre: generateRandomData(genres),
     description: generateDescription(),
     commentsCount: getRandomInteger(0, 5),
-    fullPoster: generateRandomData(images),
+    fullPoster: poster,
     originalTitle: generateRandomData(titles),
     director: 'Robert B. Weide',
     writers: 'Anne Wigton, Heinz Herald, Richard Weil',
