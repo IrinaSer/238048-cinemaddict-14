@@ -13,4 +13,32 @@ const getRandomFloat = (a = 1, b = 0) => {
   return lower + Math.random() * (upper - lower);
 };
 
-export {getRandomInteger, getRandomFloat};
+const RenderPosition = {
+  AFTERBEGIN: 'afterbegin',
+  BEFOREEND: 'beforeend',
+};
+
+const render = (container, element, place) => {
+  switch (place) {
+    case RenderPosition.AFTERBEGIN:
+      container.prepend(element);
+      break;
+    case RenderPosition.BEFOREEND:
+      container.append(element);
+      break;
+  }
+};
+
+const createElement = (template) => {
+  const newElement = document.createElement('div');
+  newElement.innerHTML = template;
+
+  return newElement.firstChild;
+};
+
+const formatName = (str) => {
+  if (!str) return str;
+  return str[0].toUpperCase() + str.slice(1);
+};
+
+export {getRandomInteger, getRandomFloat, RenderPosition, render, createElement, formatName};
