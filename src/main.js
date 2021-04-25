@@ -29,13 +29,8 @@ render(siteHeaderElement, new UserView().getElement(), RenderPosition.BEFOREEND)
 const renderMovie = (movieListElement, movie) => {
   const movieComponent = new MovieCardView(movie);
 
-  const moviePoster = movieComponent.getElement().querySelector('.film-card__poster');
-  const movieTitle = movieComponent.getElement().querySelector('.film-card__title');
-  const movieComments = movieComponent.getElement().querySelector('.film-card__comments');
-
   const showDetailInfoPopup = () => {
     const movieDetailInfoComponent = new PopupView(movie);
-    const detailInfoCloseButton = movieDetailInfoComponent.getElement().querySelector('.film-details__close-btn');
 
     const onEscKeyDown = (evt) => {
       if (evt.key === 'Escape' || evt.key === 'Esc') {
@@ -47,22 +42,20 @@ const renderMovie = (movieListElement, movie) => {
 
     const onPopupCloseHandler = () => {
       hideDetailInfoPopup(movieDetailInfoComponent.getElement());
-      detailInfoCloseButton.removeEventListener('click', onPopupCloseHandler);
+      movieDetailInfoComponent.deleteClosePopupHandler();
       document.removeEventListener('keydown', onEscKeyDown);
     };
 
     siteMainElement.appendChild(movieDetailInfoComponent.getElement());
     document.addEventListener('keydown', onEscKeyDown);
-    detailInfoCloseButton.addEventListener('click', onPopupCloseHandler);
+    movieDetailInfoComponent.setClosePopupHandler(onPopupCloseHandler);
   };
 
   const hideDetailInfoPopup = (element) => {
     siteMainElement.removeChild(element);
   };
 
-  moviePoster.addEventListener('click', showDetailInfoPopup);
-  movieTitle.addEventListener('click', showDetailInfoPopup);
-  movieComments.addEventListener('click', showDetailInfoPopup);
+  movieComponent.setShowPopupHandler(showDetailInfoPopup);
 
   render(movieListElement, movieComponent.getElement(), RenderPosition.BEFOREEND);
 };
@@ -95,8 +88,7 @@ const renderMovies = (moviesContainer, movies) => {
 
     render(filmsListComponent.getElement(), loadMoreButtonComponent.getElement(), RenderPosition.BEFOREEND);
 
-    loadMoreButtonComponent.getElement().addEventListener('click', (evt) => {
-      evt.preventDefault();
+    loadMoreButtonComponent.setClickHandler(() => {
       movies
         .slice(renderedMovieCount, renderedMovieCount + MOVIE_COUNT_PER_STEP)
         .forEach((movie) => renderMovie(filmsListContainerComponent.getElement(), movie));
