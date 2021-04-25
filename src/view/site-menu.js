@@ -1,4 +1,4 @@
-import {formatName} from '../utils.js';
+import {formatName} from '../utils/common.js';
 import AbstractView from './abstract.js';
 
 const createMenuItemTemplate = (item) => {
