@@ -39,3 +39,10 @@ export const remove = (component) => {
   component.getElement().remove();
   component.removeElement();
 };
+
+export const append = (parentComponent, childComponent) => {
+  if (!(childComponent instanceof Abstract)) {
+    throw new Error('Can append only components');
+  }
+  parentComponent.appendChild(childComponent.getElement());
+};

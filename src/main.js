@@ -11,7 +11,7 @@ import PopupView from './view/popup.js';
 import NoFilmView from './view/no-film.js';
 import { generateMovie } from './mock/movie.js';
 import { generateFilter } from './mock/filter.js';
-import { render, RenderPosition, remove } from './utils/render.js';
+import { render, RenderPosition, remove, append } from './utils/render.js';
 
 const MOVIE_COUNT = 20;
 const MOVIE_COUNT_PER_STEP = 5;
@@ -35,24 +35,20 @@ const renderMovie = (movieListElement, movie) => {
     const onEscKeyDown = (evt) => {
       if (evt.key === 'Escape' || evt.key === 'Esc') {
         evt.preventDefault();
-        hideDetailInfoPopup(movieDetailInfoComponent.getElement());
+        remove(movieDetailInfoComponent);
         document.removeEventListener('keydown', onEscKeyDown);
       }
     };
 
     const onPopupCloseHandler = () => {
-      hideDetailInfoPopup(movieDetailInfoComponent.getElement());
+      remove(movieDetailInfoComponent);
       movieDetailInfoComponent.deleteClosePopupHandler();
       document.removeEventListener('keydown', onEscKeyDown);
     };
 
-    siteMainElement.appendChild(movieDetailInfoComponent.getElement());
+    append(siteMainElement, movieDetailInfoComponent);
     document.addEventListener('keydown', onEscKeyDown);
     movieDetailInfoComponent.setClosePopupHandler(onPopupCloseHandler);
-  };
-
-  const hideDetailInfoPopup = (element) => {
-    siteMainElement.removeChild(element);
   };
 
   movieComponent.setShowPopupHandler(showDetailInfoPopup);
@@ -78,7 +74,7 @@ const renderMovies = (moviesContainer, movies) => {
   render(filmsListComponent, filmsListContainerComponent, RenderPosition.BEFOREEND);
 
   for (let i = 0; i < Math.min(movies.length, MOVIE_COUNT_PER_STEP); i++) {
-    renderMovie(filmsListContainerComponent.getElement(), movies[i]);
+    renderMovie(filmsListContainerComponent, movies[i]);
   }
 
   if (movies.length > MOVIE_COUNT_PER_STEP) {
@@ -91,7 +87,7 @@ const renderMovies = (moviesContainer, movies) => {
     loadMoreButtonComponent.setClickHandler(() => {
       movies
         .slice(renderedMovieCount, renderedMovieCount + MOVIE_COUNT_PER_STEP)
-        .forEach((movie) => renderMovie(filmsListContainerComponent.getElement(), movie));
+        .forEach((movie) => renderMovie(filmsListContainerComponent, movie));
 
       renderedMovieCount += MOVIE_COUNT_PER_STEP;
 
@@ -109,7 +105,7 @@ const renderMovies = (moviesContainer, movies) => {
   const topMovies = new Array(EXTRA_MOVIE_COUNT).fill().map(generateMovie);
 
   for (let i = 0; i < EXTRA_MOVIE_COUNT; i++) {
-    renderMovie(ratedFilmsListContainerComponent.getElement(), topMovies[i]);
+    renderMovie(ratedFilmsListContainerComponent, topMovies[i]);
   }
 
   const commentedFilmsListComponent = new FilmsListView('Most commented', true);
@@ -120,7 +116,7 @@ const renderMovies = (moviesContainer, movies) => {
   const commentedMovies = new Array(EXTRA_MOVIE_COUNT).fill().map(generateMovie);
 
   for (let i = 0; i < EXTRA_MOVIE_COUNT; i++) {
-    renderMovie(commentedFilmsListContainerComponent.getElement(), commentedMovies[i]);
+    renderMovie(commentedFilmsListContainerComponent, commentedMovies[i]);
   }
 };
 
