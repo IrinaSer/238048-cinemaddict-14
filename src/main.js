@@ -8,6 +8,7 @@ import LoadMoreButtonView from './view/load-more-button.js';
 import StatisticsView from './view/statistics.js';
 import MovieCardView from './view/list-movie-card.js';
 import PopupView from './view/popup.js';
+import NoFilmView from './view/no-film.js';
 import { generateMovie } from './mock/movie.js';
 import { generateFilter } from './mock/filter.js';
 import { render, RenderPosition } from './utils.js';
@@ -27,25 +28,41 @@ render(siteHeaderElement, new UserView().getElement(), RenderPosition.BEFOREEND)
 
 const renderMovie = (movieListElement, movie) => {
   const movieComponent = new MovieCardView(movie);
-  const movieDetailInfoComponent = new PopupView(movie);
 
   const moviePoster = movieComponent.getElement().querySelector('.film-card__poster');
   const movieTitle = movieComponent.getElement().querySelector('.film-card__title');
   const movieComments = movieComponent.getElement().querySelector('.film-card__comments');
-  const detailInfoCloseButton = movieDetailInfoComponent.getElement().querySelector('.film-details__close-btn');
 
   const showDetailInfoPopup = () => {
+    const movieDetailInfoComponent = new PopupView(movie);
+    const detailInfoCloseButton = movieDetailInfoComponent.getElement().querySelector('.film-details__close-btn');
+
+    const onEscKeyDown = (evt) => {
+      if (evt.key === 'Escape' || evt.key === 'Esc') {
+        evt.preventDefault();
+        hideDetailInfoPopup(movieDetailInfoComponent.getElement());
+        document.removeEventListener('keydown', onEscKeyDown);
+      }
+    };
+
+    const onPopupCloseHandler = () => {
+      hideDetailInfoPopup(movieDetailInfoComponent.getElement());
+      detailInfoCloseButton.removeEventListener('click', onPopupCloseHandler);
+      document.removeEventListener('keydown', onEscKeyDown);
+    };
+
     siteMainElement.appendChild(movieDetailInfoComponent.getElement());
+    document.addEventListener('keydown', onEscKeyDown);
+    detailInfoCloseButton.addEventListener('click', onPopupCloseHandler);
   };
 
-  const hideDetailInfoPopup = () => {
-    siteMainElement.removeChild(movieDetailInfoComponent.getElement());
+  const hideDetailInfoPopup = (element) => {
+    siteMainElement.removeChild(element);
   };
 
   moviePoster.addEventListener('click', showDetailInfoPopup);
   movieTitle.addEventListener('click', showDetailInfoPopup);
   movieComments.addEventListener('click', showDetailInfoPopup);
-  detailInfoCloseButton.addEventListener('click', hideDetailInfoPopup);
 
   render(movieListElement, movieComponent.getElement(), RenderPosition.BEFOREEND);
 };
@@ -54,7 +71,16 @@ const renderMovies = (moviesContainer, movies) => {
   const filmsComponent = new FilmsView();
   const filmsListComponent = new FilmsListView('All movies. Upcoming');
   const filmsListContainerComponent = new FilmsListContainerView();
+
+  if (movies.length === 0) {
+    render(moviesContainer, filmsComponent.getElement(), RenderPosition.BEFOREEND);
+    render(filmsComponent.getElement(), new NoFilmView().getElement(), RenderPosition.BEFOREEND);
+    return;
+  }
+
+  render(siteMainElement, new SortingView().getElement(), RenderPosition.BEFOREEND);
   render(moviesContainer, filmsComponent.getElement(), RenderPosition.BEFOREEND);
+
   render(filmsComponent.getElement(), filmsListComponent.getElement(), RenderPosition.BEFOREEND);
   render(filmsListComponent.getElement(), filmsListContainerComponent.getElement(), RenderPosition.BEFOREEND);
 
@@ -108,7 +134,6 @@ const renderMovies = (moviesContainer, movies) => {
 };
 
 render(siteMainElement, new SiteMenuView(filters).getElement(), RenderPosition.AFTERBEGIN);
-render(siteMainElement, new SortingView().getElement(), RenderPosition.BEFOREEND);
 
 renderMovies(siteMainElement, movies);
 
