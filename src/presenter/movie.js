@@ -49,10 +49,7 @@ export default class Movie {
 
     if (this._mode === Mode.POPUP) {
       replace(this._moviePopupComponent, prevMoviePopupComponent);
-      prevMoviePopupComponent.setClosePopupHandler(this._handleClosePopupClick);
-      prevMoviePopupComponent.setToWatchlistClickHandler(this._handleToWatchlistClick);
-      prevMoviePopupComponent.setWatchedClickHandler(this._handleWatchedClick);
-      prevMoviePopupComponent.setFavoriteClickHandler(this._handleFavoriteClick);
+      this.setPopupHandlers(this._moviePopupComponent);
     }
 
     remove(prevMovieComponent);
@@ -75,10 +72,7 @@ export default class Movie {
     const siteBody = document.querySelector('body');
     append(siteBody, this._moviePopupComponent);
     document.addEventListener('keydown', this._escKeyDownHandler);
-    this._moviePopupComponent.setClosePopupHandler(this._handleClosePopupClick);
-    this._moviePopupComponent.setToWatchlistClickHandler(this._handleToWatchlistClick);
-    this._moviePopupComponent.setWatchedClickHandler(this._handleWatchedClick);
-    this._moviePopupComponent.setFavoriteClickHandler(this._handleFavoriteClick);
+    this.setPopupHandlers(this._moviePopupComponent);
     this._changeMode();
     this._mode = Mode.POPUP;
   }
@@ -129,5 +123,13 @@ export default class Movie {
         },
       ),
     );
+  }
+
+  setPopupHandlers(container) {
+    if (!container) return;
+    container.setClosePopupHandler(this._handleClosePopupClick);
+    container.setToWatchlistClickHandler(this._handleToWatchlistClick);
+    container.setWatchedClickHandler(this._handleWatchedClick);
+    container.setFavoriteClickHandler(this._handleFavoriteClick);
   }
 }
