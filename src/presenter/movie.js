@@ -72,7 +72,8 @@ export default class Movie {
   }
 
   _handleOpenPopupClick() {
-    append(this._boardContainer, this._moviePopupComponent);
+    const siteBody = document.querySelector('body');
+    append(siteBody, this._moviePopupComponent);
     document.addEventListener('keydown', this._escKeyDownHandler);
     this._moviePopupComponent.setClosePopupHandler(this._handleClosePopupClick);
     this._moviePopupComponent.setToWatchlistClickHandler(this._handleToWatchlistClick);
