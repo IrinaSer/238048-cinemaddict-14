@@ -2,15 +2,15 @@ import FilmsView from '../view/films';
 import NoFilmView from '../view/no-film';
 import FilmsListView from '../view/films-list';
 import FilmsListContainerView from '../view/film-list-container';
-import { render, RenderPosition, remove, append } from '../utils/render';
+import { render, RenderPosition, remove } from '../utils/render';
 import UserView from '../view/site-user';
 import StatisticsView from '../view/statistics';
 import SiteMenuView from '../view/site-menu';
 import { generateFilter } from '../mock/filter';
 import SortingView from '../view/sorting';
-import MovieCardView from '../view/list-movie-card';
-import PopupView from '../view/popup';
 import LoadMoreButtonView from '../view/load-more-button';
+import MoviePresenter from './movie.js';
+import {updateItem} from '../utils/common.js';
 
 const MOVIE_COUNT_PER_STEP = 5;
 
@@ -20,6 +20,8 @@ export default class Board {
     this._boardContainer = boardContainer;
     this._headerContainer = headerContainer;
     this._footerContainer = footerContainer;
+    this._renderedMovieCount = MOVIE_COUNT_PER_STEP;
+    this._moviePresenter = {};
 
     this._boardComponent = new FilmsView();
     this._sortComponent = new SortingView();
@@ -30,6 +32,14 @@ export default class Board {
     this._ratedFilmsListContainer = new FilmsListContainerView();
     this._commentedFilmsList = new FilmsListView('Most commented', true);
     this._commentedFilmsListContainer = new FilmsListContainerView();
+    this._loadMoreButtonComponent = new LoadMoreButtonView();
+    this._userComponent = new UserView();
+    this._statisticsComponent = null;
+    this._menuComponent = null;
+
+    this._handleLoadMoreButtonClick = this._handleLoadMoreButtonClick.bind(this);
+    this._handleMovieChange = this._handleMovieChange.bind(this);
+    this._handleModeChange = this._handleModeChange.bind(this);
   }
 
   init(movieItems, ratedMovies, commentedMovies) {
@@ -37,6 +47,9 @@ export default class Board {
     this._ratedMovieItems = ratedMovies.slice();
     this._commentedMovieItems = commentedMovies.slice();
     this._filterItems = generateFilter(movieItems);
+
+    this._statisticsComponent = new StatisticsView(this._movieItems.length);
+    this._menuComponent = new SiteMenuView(this._filterItems);
 
     this._renderBoard();
   }
@@ -46,33 +59,19 @@ export default class Board {
   }
 
   _renderMovie(movieListElement, movie) {
-    const movieComponent = new MovieCardView(movie);
+    const moviePresenter = new MoviePresenter(movieListElement, this._boardContainer, this._handleMovieChange, this._handleModeChange);
 
-    const showDetailInfoPopup = () => {
-      const movieDetailInfoComponent = new PopupView(movie);
+    moviePresenter.init(movie);
+    this._moviePresenter[movie.id] = moviePresenter;
+  }
 
-      const onEscKeyDown = (evt) => {
-        if (evt.key === 'Escape' || evt.key === 'Esc') {
-          evt.preventDefault();
-          remove(movieDetailInfoComponent);
-          document.removeEventListener('keydown', onEscKeyDown);
-        }
-      };
-
-      const onPopupCloseHandler = () => {
-        remove(movieDetailInfoComponent);
-        movieDetailInfoComponent.deleteClosePopupHandler();
-        document.removeEventListener('keydown', onEscKeyDown);
-      };
-
-      append(this._boardContainer, movieDetailInfoComponent);
-      document.addEventListener('keydown', onEscKeyDown);
-      movieDetailInfoComponent.setClosePopupHandler(onPopupCloseHandler);
-    };
-
-    movieComponent.setShowPopupHandler(showDetailInfoPopup);
-
-    render(movieListElement, movieComponent, RenderPosition.BEFOREEND);
+  _clearMovieList() {
+    Object
+      .values(this._moviePresenter)
+      .forEach((presenter) => presenter.destroy());
+    this._moviePresenter = {};
+    this._renderedMovieCount = MOVIE_COUNT_PER_STEP;
+    remove(this._loadMoreButtonComponent);
   }
 
   _renderMovies(items, from, to, container) {
@@ -87,22 +86,20 @@ export default class Board {
   }
 
   _renderLoadMoreButton() {
-    let renderedMovieCount = MOVIE_COUNT_PER_STEP;
+    render(this._movieListComponent, this._loadMoreButtonComponent, RenderPosition.BEFOREEND);
 
-    const loadMoreButtonComponent = new LoadMoreButtonView();
+    this._loadMoreButtonComponent.setClickHandler(this._handleLoadMoreButtonClick);
+  }
 
-    render(this._movieListComponent, loadMoreButtonComponent, RenderPosition.BEFOREEND);
+  _handleLoadMoreButtonClick() {
+    this._renderMovies(this._movieItems, this._renderedMovieCount, this._renderedMovieCount + MOVIE_COUNT_PER_STEP,
+      this._movieListContainer);
 
-    loadMoreButtonComponent.setClickHandler(() => {
-      this._renderMovies(this._movieItems, renderedMovieCount, renderedMovieCount + MOVIE_COUNT_PER_STEP,
-        this._movieListContainer);
+    this._renderedMovieCount += MOVIE_COUNT_PER_STEP;
 
-      renderedMovieCount += MOVIE_COUNT_PER_STEP;
-
-      if (renderedMovieCount >= this._movieItems.length) {
-        remove(loadMoreButtonComponent);
-      }
-    });
+    if (this._renderedMovieCount >= this._movieItems.length) {
+      remove(this._loadMoreButtonComponent);
+    }
   }
 
   _renderMovieList() {
@@ -135,15 +132,15 @@ export default class Board {
   }
 
   _renderUser() {
-    render(this._headerContainer, new UserView(), RenderPosition.BEFOREEND);
+    render(this._headerContainer, this._userComponent, RenderPosition.BEFOREEND);
   }
 
   _renderStatistics() {
-    render(this._footerContainer, new StatisticsView(this._movieItems.length), RenderPosition.BEFOREEND);
+    render(this._footerContainer, this._statisticsComponent, RenderPosition.BEFOREEND);
   }
 
   _renderMenu() {
-    render(this._boardContainer, new SiteMenuView(this._filterItems), RenderPosition.AFTERBEGIN);
+    render(this._boardContainer, this._menuComponent, RenderPosition.AFTERBEGIN);
   }
 
   _renderExtraMovies (component, container, items) {
@@ -151,5 +148,16 @@ export default class Board {
     render(component, container, RenderPosition.BEFOREEND);
     this._renderMovies(items, 0, items.length,
       container);
+  }
+
+  _handleMovieChange(updatedMovie) {
+    this._movieItems = updateItem(this._movieItems, updatedMovie);
+    this._moviePresenter[updatedMovie.id].init(updatedMovie);
+  }
+
+  _handleModeChange() {
+    Object
+      .values(this._moviePresenter)
+      .forEach((presenter) => presenter.resetView());
   }
 }

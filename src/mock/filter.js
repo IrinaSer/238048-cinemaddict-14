@@ -1,9 +1,9 @@
 const movieToFilterMap = {
   all: (movies) => movies.length,
   watchlist: (movies) => movies
-    .filter((task) => task.isToWatch).length,
+    .filter((task) => task.isToWatchlist).length,
   history: (movies) => movies
-    .filter((task) => task.isViewed).length,
+    .filter((task) => task.isWatched).length,
   favorites: (movies) => movies
     .filter((task) => task.isFavorite).length,
 };
