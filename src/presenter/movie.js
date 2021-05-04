@@ -30,8 +30,10 @@ export default class Movie {
   init(movie) {
     this._movie = movie;
     const prevMovieComponent = this._movieComponent;
+    const prevMoviePopupComponent = this._moviePopupComponent;
 
     this._movieComponent = new MovieCardView(movie);
+    this._moviePopupComponent = new PopupView(movie);
 
     this._movieComponent.setShowPopupHandler(this._handleOpenPopupClick);
     this._movieComponent.setToWatchlistClickHandler(this._handleToWatchlistClick);
@@ -43,12 +45,20 @@ export default class Movie {
       return;
     }
 
-    if (this._movieListContainer.getElement().contains(prevMovieComponent.getElement())) {
+    if (this._mode === Mode.DEFAULT) {
       replace(this._movieComponent, prevMovieComponent);
     }
 
-    remove(prevMovieComponent);
+    if (this._mode === Mode.POPUP) {
+      replace(this._moviePopupComponent, prevMoviePopupComponent);
+      prevMoviePopupComponent.setClosePopupHandler(this._handleClosePopupClick);
+      prevMoviePopupComponent.setToWatchlistClickHandler(this._handleToWatchlistClick);
+      prevMoviePopupComponent.setWatchedClickHandler(this._handleWatchedClick);
+      prevMoviePopupComponent.setFavoriteClickHandler(this._handleFavoriteClick);
+    }
 
+    remove(prevMovieComponent);
+    remove(prevMoviePopupComponent);
   }
 
   destroy() {
@@ -59,24 +69,23 @@ export default class Movie {
   _escKeyDownHandler(evt) {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
-      remove(this._moviePopupComponent);
-      document.removeEventListener('keydown', this._escKeyDownHandler);
-      this._mode = Mode.DEFAULT;
+      this._handleClosePopupClick();
     }
   }
 
   _handleOpenPopupClick() {
-    this._moviePopupComponent = new PopupView(this._movie);
     append(this._boardContainer, this._moviePopupComponent);
     document.addEventListener('keydown', this._escKeyDownHandler);
     this._moviePopupComponent.setClosePopupHandler(this._handleClosePopupClick);
+    this._moviePopupComponent.setToWatchlistClickHandler(this._handleToWatchlistClick);
+    this._moviePopupComponent.setWatchedClickHandler(this._handleWatchedClick);
+    this._moviePopupComponent.setFavoriteClickHandler(this._handleFavoriteClick);
     this._changeMode();
     this._mode = Mode.POPUP;
   }
 
   _handleClosePopupClick() {
     remove(this._moviePopupComponent);
-    this._moviePopupComponent.deleteClosePopupHandler();
     document.removeEventListener('keydown', this._escKeyDownHandler);
     this._mode = Mode.DEFAULT;
   }

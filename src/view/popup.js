@@ -204,6 +204,9 @@ export default class Popup extends AbstractView {
     super();
     this._movie = movie;
     this._closePopupHandler = this._closePopupHandler.bind(this);
+    this._toWatchlistClickHandler = this._toWatchlistClickHandler.bind(this);
+    this._watchedClickHandler = this._watchedClickHandler.bind(this);
+    this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
   }
 
   getTemplate() {
@@ -215,12 +218,41 @@ export default class Popup extends AbstractView {
     this._callback.closePopup();
   }
 
+  _toWatchlistClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.toWatchlistClick();
+  }
+
+  _watchedClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.watchedClick();
+  }
+
+  _favoriteClickHandler(evt) {
+    evt.preventDefault();
+    this._callback.favoriteClick();
+  }
+
   setClosePopupHandler(callback) {
     this._callback.closePopup = callback;
     this.getElement().querySelector('.film-details__close-btn').addEventListener('click', this._closePopupHandler);
   }
 
-  deleteClosePopupHandler() {
-    this.getElement().querySelector('.film-details__close-btn').removeEventListener('click', this._closePopupHandler);
+  setToWatchlistClickHandler(callback) {
+    this._callback.toWatchlistClick = callback;
+    this.getElement().querySelector('.film-details__control-label--watchlist').addEventListener('click',
+      this._toWatchlistClickHandler);
+  }
+
+  setWatchedClickHandler(callback) {
+    this._callback.watchedClick = callback;
+    this.getElement().querySelector('.film-details__control-label--watched').addEventListener('click',
+      this._watchedClickHandler);
+  }
+
+  setFavoriteClickHandler(callback) {
+    this._callback.favoriteClick = callback;
+    this.getElement().querySelector('.film-details__control-label--favorite').addEventListener('click',
+      this._favoriteClickHandler);
   }
 }
