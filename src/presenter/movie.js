@@ -45,9 +45,7 @@ export default class Movie {
       return;
     }
 
-    if (this._mode === Mode.DEFAULT) {
-      replace(this._movieComponent, prevMovieComponent);
-    }
+    replace(this._movieComponent, prevMovieComponent);
 
     if (this._mode === Mode.POPUP) {
       replace(this._moviePopupComponent, prevMoviePopupComponent);
