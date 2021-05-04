@@ -12,7 +12,19 @@ const MOVIE_CARD = {
 };
 
 const createListMovieCardTemplate = (movie) => {
-  const {poster, title, rating, releaseYear, duration, genre, description, commentsCount, isToWatchlist, isWatched, isFavorite} = movie;
+  const {
+    poster,
+    title,
+    rating,
+    releaseYear,
+    duration,
+    genre,
+    description,
+    commentsCount,
+    isToWatchlist,
+    isWatched,
+    isFavorite,
+  } = movie;
   return `<article class="film-card">
   <h3 class="film-card__title">${title}</h3>
   <p class="film-card__rating">${rating}</p>
@@ -78,16 +90,19 @@ export default class MovieCard extends AbstractView {
 
   setToWatchlistClickHandler(callback) {
     this._callback.toWatchlistClick = callback;
-    this.getElement().querySelector('.film-card__controls-item--add-to-watchlist').addEventListener('click', this._toWatchlistClickHandler);
+    this.getElement().querySelector('.film-card__controls-item--add-to-watchlist').addEventListener('click',
+      this._toWatchlistClickHandler);
   }
 
   setWatchedClickHandler(callback) {
     this._callback.watchedClick = callback;
-    this.getElement().querySelector('.film-card__controls-item--mark-as-watched').addEventListener('click', this._watchedClickHandler);
+    this.getElement().querySelector('.film-card__controls-item--mark-as-watched').addEventListener('click',
+      this._watchedClickHandler);
   }
 
   setFavoriteClickHandler(callback) {
     this._callback.favoriteClick = callback;
-    this.getElement().querySelector('.film-card__controls-item--favorite').addEventListener('click', this._favoriteClickHandler);
+    this.getElement().querySelector('.film-card__controls-item--favorite').addEventListener('click',
+      this._favoriteClickHandler);
   }
 }
