@@ -85,13 +85,14 @@ const generateDate = () => {
 export const generateMovie = () => {
   const genresCount = getRandomInteger(0, 3);
   const poster = generateRandomData(images);
+  const releaseDate = generateDate();
 
   return {
     id: nanoid(),
     poster: poster,
     title: generateRandomData(titles),
     rating: generateRating(),
-    releaseYear: getRandomInteger(1900, 1970),
+    releaseYear: releaseDate.split(' ')[2],
     duration: generateDuration(),
     genre: generateRandomData(genres),
     description: generateDescription(),
@@ -101,7 +102,7 @@ export const generateMovie = () => {
     director: 'Robert B. Weide',
     writers: 'Anne Wigton, Heinz Herald, Richard Weil',
     actors: 'Erich von Stroheim, Mary Beth Hughes, Dan Duryea',
-    releaseDate: generateDate(),
+    releaseDate: releaseDate,
     country: 'USA',
     genres: new Array(genresCount).fill().map(() => generateRandomData(genres)),
     fullDescription: 'The film opens following a murder at a cabaret in Mexico City in 1936, and then presents the events leading up to it in flashback. The Great Flamarion (Erich von Stroheim) is an arrogant, friendless, and misogynous marksman who displays his trick gunshot act in the vaudeville circuit. His show features a beautiful assistant, Connie (Mary Beth Hughes) and her drunken husband Al (Dan Duryea), Flamarion`s other assistant. Flamarion falls in love with Connie, the movie`s femme fatale, and is soon manipulated by her into killing her no good husband during one of their acts.',
