@@ -9,9 +9,8 @@ const Mode = {
 
 export default class Movie {
 
-  constructor(movieListContainer, boardContainer, changeData, changeMode) {
+  constructor(movieListContainer, changeData, changeMode) {
     this._movieListContainer = movieListContainer;
-    this._boardContainer = boardContainer;
     this._changeData = changeData;
     this._changeMode = changeMode;
 
@@ -49,7 +48,7 @@ export default class Movie {
 
     if (this._mode === Mode.POPUP) {
       replace(this._moviePopupComponent, prevMoviePopupComponent);
-      this.setPopupHandlers(this._moviePopupComponent);
+      this._moviePopupComponent.setClosePopupHandler(this._handleClosePopupClick);
     }
 
     remove(prevMovieComponent);
@@ -64,7 +63,7 @@ export default class Movie {
   _escKeyDownHandler(evt) {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
-      this._handleClosePopupClick();
+      this._moviePopupComponent.close();
     }
   }
 
@@ -72,15 +71,18 @@ export default class Movie {
     const siteBody = document.querySelector('body');
     append(siteBody, this._moviePopupComponent);
     document.addEventListener('keydown', this._escKeyDownHandler);
-    this.setPopupHandlers(this._moviePopupComponent);
+    this._moviePopupComponent.setClosePopupHandler(this._handleClosePopupClick);
     this._changeMode();
     this._mode = Mode.POPUP;
   }
 
-  _handleClosePopupClick() {
+  _handleClosePopupClick(update) {
     remove(this._moviePopupComponent);
     document.removeEventListener('keydown', this._escKeyDownHandler);
     this._mode = Mode.DEFAULT;
+    this._changeData(
+      update,
+    );
   }
 
   resetView() {
@@ -123,13 +125,5 @@ export default class Movie {
         },
       ),
     );
-  }
-
-  setPopupHandlers(container) {
-    if (!container) return;
-    container.setClosePopupHandler(this._handleClosePopupClick);
-    container.setToWatchlistClickHandler(this._handleToWatchlistClick);
-    container.setWatchedClickHandler(this._handleWatchedClick);
-    container.setFavoriteClickHandler(this._handleFavoriteClick);
   }
 }
