@@ -2,7 +2,7 @@ import FilmsView from '../view/films';
 import NoFilmView from '../view/no-film';
 import FilmsListView from '../view/films-list';
 import FilmsListContainerView from '../view/film-list-container';
-import { render, RenderPosition, remove } from '../utils/render';
+import { render, RenderPosition, remove, replace } from '../utils/render';
 import UserView from '../view/site-user';
 import StatisticsView from '../view/statistics';
 import SiteMenuView from '../view/site-menu';
@@ -11,6 +11,8 @@ import SortingView from '../view/sorting';
 import LoadMoreButtonView from '../view/load-more-button';
 import MoviePresenter from './movie.js';
 import {updateItem} from '../utils/common.js';
+import {SortType} from '../const.js';
+import {sortMoviesByDate, sortMoviesByRating} from '../utils/movies.js';
 
 const MOVIE_COUNT_PER_STEP = 5;
 
@@ -22,6 +24,7 @@ export default class Board {
     this._footerContainer = footerContainer;
     this._renderedMovieCount = MOVIE_COUNT_PER_STEP;
     this._moviePresenter = {};
+    this._currentSortType = SortType.DEFAULT;
 
     this._boardComponent = new FilmsView();
     this._sortComponent = new SortingView();
@@ -40,6 +43,7 @@ export default class Board {
     this._handleLoadMoreButtonClick = this._handleLoadMoreButtonClick.bind(this);
     this._handleMovieChange = this._handleMovieChange.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
+    this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
   }
 
   init(movieItems, ratedMovies, commentedMovies) {
@@ -47,6 +51,7 @@ export default class Board {
     this._ratedMovieItems = ratedMovies.slice();
     this._commentedMovieItems = commentedMovies.slice();
     this._filterItems = generateFilter(movieItems);
+    this._sourcedMovieItems = movieItems.slice();
 
     this._statisticsComponent = new StatisticsView(this._movieItems.length);
     this._menuComponent = new SiteMenuView(this._filterItems);
@@ -56,6 +61,7 @@ export default class Board {
 
   _renderSort() {
     render(this._boardContainer, this._sortComponent, RenderPosition.BEFOREEND);
+    this._sortComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
   }
 
   _renderMovie(movieListElement, movie) {
@@ -109,6 +115,9 @@ export default class Board {
     if (this._movieItems.length > MOVIE_COUNT_PER_STEP) {
       this._renderLoadMoreButton();
     }
+
+    this._renderExtraMovies(this._ratedFilmsList, this._ratedFilmsListContainer, this._ratedMovieItems);
+    this._renderExtraMovies(this._commentedFilmsList, this._commentedFilmsListContainer, this._commentedMovieItems);
   }
 
   _renderBoard() {
@@ -127,8 +136,6 @@ export default class Board {
     render(this._movieListComponent, this._movieListContainer, RenderPosition.BEFOREEND);
 
     this._renderMovieList();
-    this._renderExtraMovies(this._ratedFilmsList, this._ratedFilmsListContainer, this._ratedMovieItems);
-    this._renderExtraMovies(this._commentedFilmsList, this._commentedFilmsListContainer, this._commentedMovieItems);
   }
 
   _renderUser() {
@@ -152,6 +159,7 @@ export default class Board {
 
   _handleMovieChange(updatedMovie) {
     this._movieItems = updateItem(this._movieItems, updatedMovie);
+    this._sourcedMovieItems = updateItem(this._sourcedMovieItems, updatedMovie);
     this._moviePresenter[updatedMovie.id].init(updatedMovie);
   }
 
@@ -159,5 +167,35 @@ export default class Board {
     Object
       .values(this._moviePresenter)
       .forEach((presenter) => presenter.resetView());
+  }
+
+  _handleSortTypeChange(sortType) {
+    if (this._currentSortType === sortType) {
+      return;
+    }
+
+    this._sortTasks(sortType);
+    this._clearMovieList();
+    this._renderMovieList();
+
+    const prevSortComponent = this._sortComponent;
+    this._sortComponent = new SortingView(sortType);
+    replace(this._sortComponent, prevSortComponent);
+    this._sortComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
+  }
+
+  _sortTasks(sortType) {
+    switch (sortType) {
+      case SortType.DATE:
+        this._movieItems.sort(sortMoviesByDate);
+        break;
+      case SortType.RATING:
+        this._movieItems.sort(sortMoviesByRating);
+        break;
+      default:
+        this._movieItems = this._sourcedMovieItems.slice();
+    }
+
+    this._currentSortType = sortType;
   }
 }
