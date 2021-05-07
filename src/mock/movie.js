@@ -1,3 +1,4 @@
+/* global require */
 import dayjs from 'dayjs';
 import {nanoid} from 'nanoid';
 import {getRandomInteger, getRandomFloat} from '../utils/common.js';
