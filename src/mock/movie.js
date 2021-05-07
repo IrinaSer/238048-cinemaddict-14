@@ -88,11 +88,6 @@ const generateDuration = () => {
   return hour !== '0' ? `${hour}h ${min}m` : `${min}m`;
 };
 
-const generateCommentDate = () => {
-  const date = new Date();
-  return dayjs(date).format('YYYY/MM/DD H:mm');
-};
-
 const generateDate = () => {
   const day = getRandomInteger(1, 30);
   const month = getRandomInteger(1, 12);
@@ -102,7 +97,7 @@ const generateDate = () => {
   return dayjs(date).format('D MMMM YYYY');
 };
 
-export const generateMovie = () => {
+export const generateMovie = (comments) => {
   const genresCount = getRandomInteger(0, 3);
   const poster = generateRandomData(images);
   const releaseDate = generateDate();
@@ -116,7 +111,7 @@ export const generateMovie = () => {
     duration: generateDuration(),
     genre: generateRandomData(genres),
     description: generateDescription(),
-    commentsCount: getRandomInteger(0, 5),
+    commentsCount: comments.length,
     fullPoster: poster,
     originalTitle: generateRandomData(titles),
     director: 'Robert B. Weide',
@@ -130,6 +125,6 @@ export const generateMovie = () => {
     isToWatchlist: Boolean(getRandomInteger(0, 1)),
     isWatched: Boolean(getRandomInteger(0, 1)),
     isFavorite: Boolean(getRandomInteger(0, 1)),
-    commentDate: generateCommentDate(),
+    comments: comments.map((comment) => comment.id),
   };
 };
