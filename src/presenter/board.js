@@ -5,20 +5,20 @@ import FilmsListContainerView from '../view/film-list-container';
 import { render, RenderPosition, remove, replace } from '../utils/render';
 import UserView from '../view/site-user';
 import StatisticsView from '../view/statistics';
-import SiteMenuView from '../view/site-menu';
-import { generateFilter } from '../mock/filter';
 import SortView from '../view/sorting';
 import LoadMoreButtonView from '../view/load-more-button';
 import MoviePresenter from './movie.js';
 import {SortType, UpdateType, UserAction} from '../const.js';
 import {sortMoviesByDate, sortMoviesByRating} from '../utils/movies.js';
+import {filter} from '../utils/filter.js';
 
 const MOVIE_COUNT_PER_STEP = 5;
 
 export default class Board {
 
-  constructor(boardContainer, headerContainer, footerContainer, moviesModel) {
+  constructor(boardContainer, headerContainer, footerContainer, moviesModel, filterModel) {
     this._moviesModel = moviesModel;
+    this._filterModel = filterModel;
     this._boardContainer = boardContainer;
     this._headerContainer = headerContainer;
     this._footerContainer = footerContainer;
@@ -39,7 +39,6 @@ export default class Board {
     this._commentedFilmsListContainer = new FilmsListContainerView();
     this._userComponent = new UserView();
     this._statisticsComponent = null;
-    this._menuComponent = null;
 
     this._handleLoadMoreButtonClick = this._handleLoadMoreButtonClick.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
@@ -48,13 +47,11 @@ export default class Board {
     this._handleModelEvent = this._handleModelEvent.bind(this);
 
     this._moviesModel.addObserver(this._handleModelEvent);
+    this._filterModel.addObserver(this._handleModelEvent);
   }
 
   init() {
-    this._filterItems = generateFilter(this._getMovies());
-
     this._statisticsComponent = new StatisticsView(this._getMovies().length);
-    this._menuComponent = new SiteMenuView(this._filterItems);
 
     this._renderBoard();
   }
@@ -112,7 +109,6 @@ export default class Board {
   }
 
   _renderBoard() {
-    this._renderMenu();
     this._renderStatistics();
 
     const movies = this._getMovies();
@@ -142,10 +138,6 @@ export default class Board {
 
   _renderStatistics() {
     render(this._footerContainer, this._statisticsComponent, RenderPosition.BEFOREEND);
-  }
-
-  _renderMenu() {
-    render(this._boardContainer, this._menuComponent, RenderPosition.AFTERBEGIN);
   }
 
   _renderExtraMovies (component, container, items) {
@@ -204,14 +196,18 @@ export default class Board {
   }
 
   _getMovies() {
+    const filterType = this._filterModel.getFilter();
+    const movies = this._moviesModel.getMovies();
+    const filteredTasks = filter[filterType](movies);
+
     switch (this._currentSortType) {
       case SortType.DATE:
-        return this._moviesModel.getMovies().slice().sort(sortMoviesByDate);
+        return filteredTasks.sort(sortMoviesByDate);
       case SortType.RATING:
-        return this._moviesModel.getMovies().slice().sort(sortMoviesByRating);
+        return filteredTasks.sort(sortMoviesByRating);
     }
 
-    return this._moviesModel.getMovies();
+    return filteredTasks;
   }
 
   _clearBoard({resetRenderedMovieCount = false, resetSortType = false} = {}) {
