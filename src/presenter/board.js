@@ -2,7 +2,7 @@ import FilmsView from '../view/films';
 import NoFilmView from '../view/no-film';
 import FilmsListView from '../view/films-list';
 import FilmsListContainerView from '../view/film-list-container';
-import { render, RenderPosition, remove } from '../utils/render';
+import { render, RenderPosition, remove, replace } from '../utils/render';
 import UserView from '../view/site-user';
 import StatisticsView from '../view/statistics';
 import SiteMenuView from '../view/site-menu';
@@ -177,6 +177,11 @@ export default class Board {
     this._sortTasks(sortType);
     this._clearMovieList();
     this._renderMovieList();
+
+    const prevSortComponent = this._sortComponent;
+    this._sortComponent = new SortingView(sortType);
+    replace(this._sortComponent, prevSortComponent);
+    this._sortComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
   }
 
   _sortTasks(sortType) {
