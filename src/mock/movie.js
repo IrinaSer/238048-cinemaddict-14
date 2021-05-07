@@ -67,10 +67,29 @@ const generateRating = () => {
 };
 
 const generateDuration = () => {
-  const hour = getRandomInteger(0, 1);
-  const min = getRandomInteger(10, 60);
+  const duration = require('dayjs/plugin/duration');
+  dayjs.extend(duration);
+  const customParseFormat = require('dayjs/plugin/customParseFormat');
+  dayjs.extend(customParseFormat);
 
-  return hour ? `${hour}h ${min}m` : `${min}m`;
+  const serverMinutes = getRandomInteger(1, 200);
+  const hours = Math.trunc((serverMinutes / 60));
+  const minutes = serverMinutes - 60 * hours;
+
+  const parsedMinutes = dayjs.duration({
+    seconds: 0,
+    minutes: minutes,
+    hours: hours,
+  }).format('H:mm').split(':');
+
+  const [hour, min] = parsedMinutes;
+
+  return hour !== '0' ? `${hour}h ${min}m` : `${min}m`;
+};
+
+const generateCommentDate = () => {
+  const date = new Date();
+  return dayjs(date).format('YYYY/MM/DD H:mm');
 };
 
 const generateDate = () => {
@@ -109,5 +128,6 @@ export const generateMovie = () => {
     isToWatchlist: Boolean(getRandomInteger(0, 1)),
     isWatched: Boolean(getRandomInteger(0, 1)),
     isFavorite: Boolean(getRandomInteger(0, 1)),
+    commentDate: generateCommentDate(),
   };
 };
