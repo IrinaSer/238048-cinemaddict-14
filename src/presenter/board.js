@@ -7,18 +7,18 @@ import UserView from '../view/site-user';
 import StatisticsView from '../view/statistics';
 import SiteMenuView from '../view/site-menu';
 import { generateFilter } from '../mock/filter';
-import SortingView from '../view/sorting';
+import SortView from '../view/sorting';
 import LoadMoreButtonView from '../view/load-more-button';
 import MoviePresenter from './movie.js';
-import {updateItem} from '../utils/common.js';
-import {SortType} from '../const.js';
+import {SortType, UpdateType, UserAction} from '../const.js';
 import {sortMoviesByDate, sortMoviesByRating} from '../utils/movies.js';
 
 const MOVIE_COUNT_PER_STEP = 5;
 
 export default class Board {
 
-  constructor(boardContainer, headerContainer, footerContainer) {
+  constructor(boardContainer, headerContainer, footerContainer, moviesModel) {
+    this._moviesModel = moviesModel;
     this._boardContainer = boardContainer;
     this._headerContainer = headerContainer;
     this._footerContainer = footerContainer;
@@ -26,8 +26,10 @@ export default class Board {
     this._moviePresenter = {};
     this._currentSortType = SortType.DEFAULT;
 
+    this._sortComponent = null;
+    this._loadMoreButtonComponent = null;
+
     this._boardComponent = new FilmsView();
-    this._sortComponent = new SortingView();
     this._movieListComponent = new FilmsListView('All movies. Upcoming');
     this._movieListContainer = new FilmsListContainerView();
     this._noMovieComponent = new NoFilmView();
@@ -35,55 +37,49 @@ export default class Board {
     this._ratedFilmsListContainer = new FilmsListContainerView();
     this._commentedFilmsList = new FilmsListView('Most commented', true);
     this._commentedFilmsListContainer = new FilmsListContainerView();
-    this._loadMoreButtonComponent = new LoadMoreButtonView();
     this._userComponent = new UserView();
     this._statisticsComponent = null;
     this._menuComponent = null;
 
     this._handleLoadMoreButtonClick = this._handleLoadMoreButtonClick.bind(this);
-    this._handleMovieChange = this._handleMovieChange.bind(this);
     this._handleModeChange = this._handleModeChange.bind(this);
     this._handleSortTypeChange = this._handleSortTypeChange.bind(this);
+    this._handleViewAction = this._handleViewAction.bind(this);
+    this._handleModelEvent = this._handleModelEvent.bind(this);
+
+    this._moviesModel.addObserver(this._handleModelEvent);
   }
 
-  init(movieItems, ratedMovies, commentedMovies) {
-    this._movieItems = movieItems.slice();
-    this._ratedMovieItems = ratedMovies.slice();
-    this._commentedMovieItems = commentedMovies.slice();
-    this._filterItems = generateFilter(movieItems);
-    this._sourcedMovieItems = movieItems.slice();
+  init() {
+    this._filterItems = generateFilter(this._getMovies());
 
-    this._statisticsComponent = new StatisticsView(this._movieItems.length);
+    this._statisticsComponent = new StatisticsView(this._getMovies().length);
     this._menuComponent = new SiteMenuView(this._filterItems);
 
     this._renderBoard();
   }
 
   _renderSort() {
-    render(this._boardContainer, this._sortComponent, RenderPosition.BEFOREEND);
+    if (this._sortComponent !== null) {
+      this._sortComponent = null;
+    }
+
+    this._sortComponent = new SortView(this._currentSortType);
+
     this._sortComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
+
+    render(this._boardComponent, this._sortComponent, RenderPosition.AFTERBEGIN);
   }
 
   _renderMovie(movieListElement, movie) {
-    const moviePresenter = new MoviePresenter(movieListElement, this._handleMovieChange, this._handleModeChange);
+    const moviePresenter = new MoviePresenter(movieListElement, this._handleViewAction, this._handleModeChange);
 
     moviePresenter.init(movie);
     this._moviePresenter[movie.id] = moviePresenter;
   }
 
-  _clearMovieList() {
-    Object
-      .values(this._moviePresenter)
-      .forEach((presenter) => presenter.destroy());
-    this._moviePresenter = {};
-    this._renderedMovieCount = MOVIE_COUNT_PER_STEP;
-    remove(this._loadMoreButtonComponent);
-  }
-
-  _renderMovies(items, from, to, container) {
-    items
-      .slice(from, to)
-      .forEach((movie) => this._renderMovie(container, movie));
+  _renderMovies(movies, container) {
+    movies.forEach((movie) => this._renderMovie(container, movie));
   }
 
   _renderNoMovies() {
@@ -92,39 +88,37 @@ export default class Board {
   }
 
   _renderLoadMoreButton() {
-    render(this._movieListComponent, this._loadMoreButtonComponent, RenderPosition.BEFOREEND);
+    if (this._loadMoreButtonComponent !== null) {
+      this._loadMoreButtonComponent = null;
+    }
 
+    this._loadMoreButtonComponent = new LoadMoreButtonView();
     this._loadMoreButtonComponent.setClickHandler(this._handleLoadMoreButtonClick);
+
+    render(this._movieListComponent, this._loadMoreButtonComponent, RenderPosition.BEFOREEND);
   }
 
   _handleLoadMoreButtonClick() {
-    this._renderMovies(this._movieItems, this._renderedMovieCount, this._renderedMovieCount + MOVIE_COUNT_PER_STEP,
-      this._movieListContainer);
+    const movieCount = this._getMovies().length;
+    const newRenderedMovieCount = Math.min(movieCount, this._renderedMovieCount + MOVIE_COUNT_PER_STEP);
+    const movies = this._getMovies().slice(this._renderedMovieCount, newRenderedMovieCount);
 
-    this._renderedMovieCount += MOVIE_COUNT_PER_STEP;
+    this._renderMovies(movies, this._movieListContainer);
+    this._renderedMovieCount = newRenderedMovieCount;
 
-    if (this._renderedMovieCount >= this._movieItems.length) {
+    if (this._renderedMovieCount >= movieCount) {
       remove(this._loadMoreButtonComponent);
     }
-  }
-
-  _renderMovieList() {
-    this._renderMovies(this._movieItems, 0, Math.min(this._movieItems.length, MOVIE_COUNT_PER_STEP),
-      this._movieListContainer);
-
-    if (this._movieItems.length > MOVIE_COUNT_PER_STEP) {
-      this._renderLoadMoreButton();
-    }
-
-    this._renderExtraMovies(this._ratedFilmsList, this._ratedFilmsListContainer, this._ratedMovieItems);
-    this._renderExtraMovies(this._commentedFilmsList, this._commentedFilmsListContainer, this._commentedMovieItems);
   }
 
   _renderBoard() {
     this._renderMenu();
     this._renderStatistics();
 
-    if (this._movieItems.length === 0) {
+    const movies = this._getMovies();
+    const moviesCount = movies.length;
+
+    if (moviesCount === 0) {
       this._renderNoMovies();
       return;
     }
@@ -135,7 +129,11 @@ export default class Board {
     render(this._boardComponent, this._movieListComponent, RenderPosition.BEFOREEND);
     render(this._movieListComponent, this._movieListContainer, RenderPosition.BEFOREEND);
 
-    this._renderMovieList();
+    this._renderMovies(movies.slice(0, Math.min(moviesCount, this._renderedMovieCount)), this._movieListContainer);
+
+    if (moviesCount > this._renderedMovieCount) {
+      this._renderLoadMoreButton();
+    }
   }
 
   _renderUser() {
@@ -153,14 +151,35 @@ export default class Board {
   _renderExtraMovies (component, container, items) {
     render(this._boardComponent, component, RenderPosition.BEFOREEND);
     render(component, container, RenderPosition.BEFOREEND);
-    this._renderMovies(items, 0, items.length,
-      container);
+    this._renderMovies(items, container);
   }
 
-  _handleMovieChange(updatedMovie) {
-    this._movieItems = updateItem(this._movieItems, updatedMovie);
-    this._sourcedMovieItems = updateItem(this._sourcedMovieItems, updatedMovie);
-    this._moviePresenter[updatedMovie.id].init(updatedMovie);
+  _handleViewAction(actionType, updateType, update) {
+    switch (actionType) {
+      case UserAction.UPDATE_TASK:
+        this._moviesModel.updateMovie(updateType, update);
+        break;
+      case UserAction.ADD_TASK:
+        break;
+      case UserAction.DELETE_TASK:
+        break;
+    }
+  }
+
+  _handleModelEvent(updateType, data) {
+    switch (updateType) {
+      case UpdateType.PATCH:
+        this._moviePresenter[data.id].init(data);
+        break;
+      case UpdateType.MINOR:
+        this._clearBoard();
+        this._renderBoard();
+        break;
+      case UpdateType.MAJOR:
+        this._clearBoard({resetRenderedMovieCount: true, resetSortType: true});
+        this._renderBoard();
+        break;
+    }
   }
 
   _handleModeChange() {
@@ -174,28 +193,47 @@ export default class Board {
       return;
     }
 
-    this._sortTasks(sortType);
-    this._clearMovieList();
-    this._renderMovieList();
+    this._currentSortType = sortType;
+    this._clearBoard({resetRenderedMovieCount: true});
+    this._renderBoard();
 
     const prevSortComponent = this._sortComponent;
-    this._sortComponent = new SortingView(sortType);
+    this._sortComponent = new SortView(sortType);
     replace(this._sortComponent, prevSortComponent);
     this._sortComponent.setSortTypeChangeHandler(this._handleSortTypeChange);
   }
 
-  _sortTasks(sortType) {
-    switch (sortType) {
+  _getMovies() {
+    switch (this._currentSortType) {
       case SortType.DATE:
-        this._movieItems.sort(sortMoviesByDate);
-        break;
+        return this._moviesModel.getMovies().slice().sort(sortMoviesByDate);
       case SortType.RATING:
-        this._movieItems.sort(sortMoviesByRating);
-        break;
-      default:
-        this._movieItems = this._sourcedMovieItems.slice();
+        return this._moviesModel.getMovies().slice().sort(sortMoviesByRating);
     }
 
-    this._currentSortType = sortType;
+    return this._moviesModel.getMovies();
+  }
+
+  _clearBoard({resetRenderedMovieCount = false, resetSortType = false} = {}) {
+    const movieCount = this._getMovies().length;
+
+    Object
+      .values(this._moviePresenter)
+      .forEach((presenter) => presenter.destroy());
+    this._moviePresenter = {};
+
+    remove(this._sortComponent);
+    remove(this._noMovieComponent);
+    remove(this._loadMoreButtonComponent);
+
+    if (resetRenderedMovieCount) {
+      this._renderedMovieCount = MOVIE_COUNT_PER_STEP;
+    } else {
+      this._renderedMovieCount = Math.min(movieCount, this._renderedMovieCount);
+    }
+
+    if (resetSortType) {
+      this._currentSortType = SortType.DEFAULT;
+    }
   }
 }

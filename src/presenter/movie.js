@@ -1,6 +1,7 @@
 import MovieCardView from '../view/list-movie-card';
 import PopupView from '../view/popup';
 import { render, RenderPosition, remove, append, replace } from '../utils/render';
+import {UserAction, UpdateType} from '../const.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -81,6 +82,8 @@ export default class Movie {
     document.removeEventListener('keydown', this._escKeyDownHandler);
     this._mode = Mode.DEFAULT;
     this._changeData(
+      UserAction.UPDATE_TASK,
+      UpdateType.MINOR,
       update,
     );
   }
@@ -93,6 +96,8 @@ export default class Movie {
 
   _handleFavoriteClick() {
     this._changeData(
+      UserAction.UPDATE_TASK,
+      UpdateType.MINOR,
       Object.assign(
         {},
         this._movie,
@@ -105,6 +110,8 @@ export default class Movie {
 
   _handleToWatchlistClick() {
     this._changeData(
+      UserAction.UPDATE_TASK,
+      UpdateType.MINOR,
       Object.assign(
         {},
         this._movie,
@@ -117,6 +124,8 @@ export default class Movie {
 
   _handleWatchedClick() {
     this._changeData(
+      UserAction.UPDATE_TASK,
+      UpdateType.MINOR,
       Object.assign(
         {},
         this._movie,
