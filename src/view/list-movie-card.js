@@ -68,9 +68,15 @@ export default class MovieCard extends AbstractView {
 
   setShowPopupHandler(callback) {
     this._callback.showPopup = callback;
-    this.getElement().querySelector('.film-card__poster').addEventListener('click', this._showPopupHandler);
-    this.getElement().querySelector('.film-card__title').addEventListener('click', this._showPopupHandler);
-    this.getElement().querySelector('.film-card__comments').addEventListener('click', this._showPopupHandler);
+    this.getElement()
+      .querySelector('.film-card__poster')
+      .addEventListener('click', this._showPopupHandler);
+    this.getElement()
+      .querySelector('.film-card__title')
+      .addEventListener('click', this._showPopupHandler);
+    this.getElement()
+      .querySelector('.film-card__comments')
+      .addEventListener('click', this._showPopupHandler);
   }
 
   _toWatchlistClickHandler(evt) {
@@ -90,19 +96,22 @@ export default class MovieCard extends AbstractView {
 
   setToWatchlistClickHandler(callback) {
     this._callback.toWatchlistClick = callback;
-    this.getElement().querySelector('.film-card__controls-item--add-to-watchlist').addEventListener('click',
-      this._toWatchlistClickHandler);
+    this.getElement()
+      .querySelector('.film-card__controls-item--add-to-watchlist')
+      .addEventListener('click', this._toWatchlistClickHandler);
   }
 
   setWatchedClickHandler(callback) {
     this._callback.watchedClick = callback;
-    this.getElement().querySelector('.film-card__controls-item--mark-as-watched').addEventListener('click',
-      this._watchedClickHandler);
+    this.getElement()
+      .querySelector('.film-card__controls-item--mark-as-watched')
+      .addEventListener('click', this._watchedClickHandler);
   }
 
   setFavoriteClickHandler(callback) {
     this._callback.favoriteClick = callback;
-    this.getElement().querySelector('.film-card__controls-item--favorite').addEventListener('click',
-      this._favoriteClickHandler);
+    this.getElement()
+      .querySelector('.film-card__controls-item--favorite')
+      .addEventListener('click', this._favoriteClickHandler);
   }
 }
