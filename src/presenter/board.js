@@ -16,9 +16,10 @@ const MOVIE_COUNT_PER_STEP = 5;
 
 export default class Board {
 
-  constructor(boardContainer, headerContainer, footerContainer, moviesModel, filterModel) {
+  constructor(boardContainer, headerContainer, footerContainer, moviesModel, filterModel, commentsModel) {
     this._moviesModel = moviesModel;
     this._filterModel = filterModel;
+    this._commentsModel = commentsModel;
     this._boardContainer = boardContainer;
     this._headerContainer = headerContainer;
     this._footerContainer = footerContainer;
@@ -48,6 +49,7 @@ export default class Board {
 
     this._moviesModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
+    // this._commentsModel.addObserver(this._handleModelEvent);
   }
 
   init() {
@@ -69,7 +71,7 @@ export default class Board {
   }
 
   _renderMovie(movieListElement, movie) {
-    const moviePresenter = new MoviePresenter(movieListElement, this._handleViewAction, this._handleModeChange);
+    const moviePresenter = new MoviePresenter(movieListElement, this._handleViewAction, this._handleModeChange, this._commentsModel);
 
     moviePresenter.init(movie);
     this._moviePresenter[movie.id] = moviePresenter;
@@ -147,14 +149,8 @@ export default class Board {
   }
 
   _handleViewAction(actionType, updateType, update) {
-    switch (actionType) {
-      case UserAction.UPDATE_TASK:
-        this._moviesModel.updateMovie(updateType, update);
-        break;
-      case UserAction.ADD_TASK:
-        break;
-      case UserAction.DELETE_TASK:
-        break;
+    if (actionType === UserAction.UPDATE_MOVIE) {
+      this._moviesModel.updateMovie(updateType, update);
     }
   }
 
@@ -163,11 +159,11 @@ export default class Board {
       case UpdateType.PATCH:
         this._moviePresenter[data.id].init(data);
         break;
-      case UpdateType.MINOR:
+      case UpdateType.MINOR: // TODO
         this._clearBoard();
         this._renderBoard();
         break;
-      case UpdateType.MAJOR:
+      case UpdateType.MAJOR: // TODO
         this._clearBoard({resetRenderedMovieCount: true, resetSortType: true});
         this._renderBoard();
         break;
