@@ -49,7 +49,6 @@ export default class Board {
 
     this._moviesModel.addObserver(this._handleModelEvent);
     this._filterModel.addObserver(this._handleModelEvent);
-    // this._commentsModel.addObserver(this._handleModelEvent);
   }
 
   init() {
@@ -149,8 +148,10 @@ export default class Board {
   }
 
   _handleViewAction(actionType, updateType, update) {
-    if (actionType === UserAction.UPDATE_MOVIE) {
-      this._moviesModel.updateMovie(updateType, update);
+    switch (actionType) {
+      case UserAction.UPDATE_MOVIE:
+        this._moviesModel.updateMovie(updateType, update);
+        break;
     }
   }
 
@@ -159,11 +160,11 @@ export default class Board {
       case UpdateType.PATCH:
         this._moviePresenter[data.id].init(data);
         break;
-      case UpdateType.MINOR: // TODO
+      case UpdateType.MINOR:
         this._clearBoard();
         this._renderBoard();
         break;
-      case UpdateType.MAJOR: // TODO
+      case UpdateType.MAJOR:
         this._clearBoard({resetRenderedMovieCount: true, resetSortType: true});
         this._renderBoard();
         break;

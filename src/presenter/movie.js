@@ -10,10 +10,12 @@ const Mode = {
 
 export default class Movie {
 
-  constructor(movieListContainer, changeData, changeMode) {
+  constructor(movieListContainer, changeData, changeMode, commentsModel) {
     this._movieListContainer = movieListContainer;
     this._changeData = changeData;
     this._changeMode = changeMode;
+    this._commentsModel = commentsModel;
+    this._comments = this._commentsModel.getComments().slice();
 
     this._movieComponent = null;
     this._moviePopupComponent = null;
@@ -25,6 +27,11 @@ export default class Movie {
     this._handleToWatchlistClick = this._handleToWatchlistClick.bind(this);
     this._handleWatchedClick = this._handleWatchedClick.bind(this);
     this._handleFavoriteClick = this._handleFavoriteClick.bind(this);
+    this._handleCommentDeleteClick = this._handleCommentDeleteClick.bind(this);
+    this._setPopupInnerHandlers = this._setPopupInnerHandlers.bind(this);
+    this._handleModelEvent = this._handleModelEvent.bind(this);
+
+    this._commentsModel.addObserver(this._handleModelEvent);
   }
 
   init(movie) {
@@ -32,8 +39,8 @@ export default class Movie {
     const prevMovieComponent = this._movieComponent;
     const prevMoviePopupComponent = this._moviePopupComponent;
 
-    this._movieComponent = new MovieCardView(movie);
-    this._moviePopupComponent = new PopupView(movie);
+    this._movieComponent = new MovieCardView(movie, this._comments);
+    this._moviePopupComponent = new PopupView(movie, this._comments);
 
     this._movieComponent.setShowPopupHandler(this._handleOpenPopupClick);
     this._movieComponent.setToWatchlistClickHandler(this._handleToWatchlistClick);
@@ -49,7 +56,7 @@ export default class Movie {
 
     if (this._mode === Mode.POPUP) {
       replace(this._moviePopupComponent, prevMoviePopupComponent);
-      this._moviePopupComponent.setClosePopupHandler(this._handleClosePopupClick);
+      this._setPopupInnerHandlers();
     }
 
     remove(prevMovieComponent);
@@ -59,6 +66,28 @@ export default class Movie {
   destroy() {
     remove(this._movieComponent);
     remove(this._moviePopupComponent);
+  }
+
+  updatePopup() {
+    const prevMoviePopupComponent = this._moviePopupComponent;
+    const comments = this._commentsModel.getComments().slice();
+    const scrollPosition = prevMoviePopupComponent.getElement().scrollTop;
+
+    this._moviePopupComponent = new PopupView(this._movie, comments);
+
+    if (this._mode === Mode.POPUP) {
+      replace(this._moviePopupComponent, prevMoviePopupComponent);
+      this._moviePopupComponent.setClosePopupHandler(this._handleClosePopupClick);
+      this._moviePopupComponent.getElement().scrollTop = scrollPosition;
+      this._setPopupInnerHandlers();
+    }
+
+    remove(prevMoviePopupComponent);
+  }
+
+  _setPopupInnerHandlers() {
+    this._moviePopupComponent.setClosePopupHandler(this._handleClosePopupClick);
+    this._moviePopupComponent.setCommentDeleteHandler(this._handleCommentDeleteClick);
   }
 
   _escKeyDownHandler(evt) {
@@ -72,7 +101,7 @@ export default class Movie {
     const siteBody = document.querySelector('body');
     append(siteBody, this._moviePopupComponent);
     document.addEventListener('keydown', this._escKeyDownHandler);
-    this._moviePopupComponent.setClosePopupHandler(this._handleClosePopupClick);
+    this._setPopupInnerHandlers();
     this._changeMode();
     this._mode = Mode.POPUP;
   }
@@ -82,7 +111,7 @@ export default class Movie {
     document.removeEventListener('keydown', this._escKeyDownHandler);
     this._mode = Mode.DEFAULT;
     this._changeData(
-      UserAction.UPDATE_TASK,
+      UserAction.UPDATE_MOVIE,
       UpdateType.MINOR,
       update,
     );
@@ -96,7 +125,7 @@ export default class Movie {
 
   _handleFavoriteClick() {
     this._changeData(
-      UserAction.UPDATE_TASK,
+      UserAction.UPDATE_MOVIE,
       UpdateType.MINOR,
       Object.assign(
         {},
@@ -110,7 +139,7 @@ export default class Movie {
 
   _handleToWatchlistClick() {
     this._changeData(
-      UserAction.UPDATE_TASK,
+      UserAction.UPDATE_MOVIE,
       UpdateType.MINOR,
       Object.assign(
         {},
@@ -124,7 +153,7 @@ export default class Movie {
 
   _handleWatchedClick() {
     this._changeData(
-      UserAction.UPDATE_TASK,
+      UserAction.UPDATE_MOVIE,
       UpdateType.MINOR,
       Object.assign(
         {},
@@ -134,5 +163,17 @@ export default class Movie {
         },
       ),
     );
+  }
+
+  _handleCommentDeleteClick(update) {
+    this._commentsModel.deleteComment(UserAction.DELETE_COMMENT, update);
+  }
+
+  _handleModelEvent(updateType) {
+    switch (updateType) {
+      case UserAction.DELETE_COMMENT:
+        this.updatePopup(this._movie.id);
+        break;
+    }
   }
 }

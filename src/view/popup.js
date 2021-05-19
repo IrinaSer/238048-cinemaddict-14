@@ -4,7 +4,74 @@ const createFilmDetailsGenreTemplate = (genre) => {
   return `<span class="film-details__genre">${genre}</span>`;
 };
 
-const createPopupTemplate = (data = {}) => {
+const createCommentTemplate = (_comment = {}) => {
+  const {
+    id,
+    emotion,
+    comment,
+    author,
+    date,
+  } = _comment;
+  return `<li class="film-details__comment">
+            <span class="film-details__comment-emoji">
+              <img src="./images/emoji/${emotion}.png" width="55" height="55" alt="emoji-${emotion}">
+            </span>
+            <div>
+              <p class="film-details__comment-text">${comment}</p>
+              <p class="film-details__comment-info">
+                <span class="film-details__comment-author">${author}</span>
+                <span class="film-details__comment-day">${date}</span>
+                <button class="film-details__comment-delete" data-comment="${id}">Delete</button>
+              </p>
+            </div>
+          </li>`;
+};
+
+const createCommentFormTemplate = () => {
+  return `<div class="film-details__new-comment">
+          <div class="film-details__add-emoji-label"></div>
+
+          <label class="film-details__comment-label">
+            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment"></textarea>
+          </label>
+
+          <div class="film-details__emoji-list">
+            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" value="smile">
+            <label class="film-details__emoji-label" for="emoji-smile">
+              <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">
+            </label>
+
+            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-sleeping" value="sleeping">
+            <label class="film-details__emoji-label" for="emoji-sleeping">
+              <img src="./images/emoji/sleeping.png" width="30" height="30" alt="emoji">
+            </label>
+
+            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-puke" value="puke">
+            <label class="film-details__emoji-label" for="emoji-puke">
+              <img src="./images/emoji/puke.png" width="30" height="30" alt="emoji">
+            </label>
+
+            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-angry" value="angry">
+            <label class="film-details__emoji-label" for="emoji-angry">
+              <img src="./images/emoji/angry.png" width="30" height="30" alt="emoji">
+            </label>
+          </div>
+        </div>`;
+};
+
+const createCommentsTemplate = (comments) => {
+  const commentItemsTemplate = comments
+    .map((comment) => createCommentTemplate(comment))
+    .join('');
+
+  return `<section class="film-details__comments-wrap">
+  <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${comments.length}</span></h3>
+  <ul class="film-details__comments-list">${commentItemsTemplate}</ul>
+    ${createCommentFormTemplate()}
+  </section>`;
+};
+
+const createPopupTemplate = (data = {}, comments) => {
   const {
     fullPoster,
     ageRating,
@@ -19,12 +86,9 @@ const createPopupTemplate = (data = {}) => {
     duration,
     genres,
     fullDescription,
-    commentsCount,
     isToWatchlist,
     isWatched,
     isFavorite,
-    emoji,
-    comment,
   } = data;
 
   const filmDetailsGenresTemplate = genres
@@ -108,65 +172,31 @@ const createPopupTemplate = (data = {}) => {
     </div>
 
     <div class="film-details__bottom-container">
-      <section class="film-details__comments-wrap">
-        <h3 class="film-details__comments-title">Comments <span class="film-details__comments-count">${commentsCount}</span></h3>
-
-        <ul class="film-details__comments-list">
-        </ul>
-
-        <div class="film-details__new-comment">
-          <div class="film-details__add-emoji-label">
-            ${emoji ? `<img src="images/emoji/${emoji}.png" width="55" height="55" alt="emoji-smile">` : '' }
-          </div>
-
-          <label class="film-details__comment-label">
-            <textarea class="film-details__comment-input" placeholder="Select reaction below and write comment here" name="comment">${comment ? comment : ''}</textarea>
-          </label>
-
-          <div class="film-details__emoji-list">
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-smile" value="smile" ${emoji === 'smile' ? 'checked' : '' }>
-            <label class="film-details__emoji-label" for="emoji-smile">
-              <img src="./images/emoji/smile.png" width="30" height="30" alt="emoji">
-            </label>
-
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-sleeping" value="sleeping" ${emoji === 'sleeping' ? 'checked' : '' }>
-            <label class="film-details__emoji-label" for="emoji-sleeping">
-              <img src="./images/emoji/sleeping.png" width="30" height="30" alt="emoji">
-            </label>
-
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-puke" value="puke" ${emoji === 'puke' ? 'checked' : '' }>
-            <label class="film-details__emoji-label" for="emoji-puke">
-              <img src="./images/emoji/puke.png" width="30" height="30" alt="emoji">
-            </label>
-
-            <input class="film-details__emoji-item visually-hidden" name="comment-emoji" type="radio" id="emoji-angry" value="angry" ${emoji === 'angry' ? 'checked' : '' }>
-            <label class="film-details__emoji-label" for="emoji-angry">
-              <img src="./images/emoji/angry.png" width="30" height="30" alt="emoji">
-            </label>
-          </div>
-        </div>
-      </section>
+      ${createCommentsTemplate(comments)}
     </div>
   </form>
 </section>`;
 };
 
 export default class Popup extends SmartView {
-  constructor(movie) {
+  constructor(movie, comments) {
     super();
     this._data = movie;
+    this._comments = comments;
+
     this._closePopupHandler = this._closePopupHandler.bind(this);
     this._toWatchlistClickHandler = this._toWatchlistClickHandler.bind(this);
     this._watchedClickHandler = this._watchedClickHandler.bind(this);
     this._favoriteClickHandler = this._favoriteClickHandler.bind(this);
     this._commentInputHandler = this._commentInputHandler.bind(this);
     this._emojiChangeHandler = this._emojiChangeHandler.bind(this);
+    this._commentDeleteHandler = this._commentDeleteHandler.bind(this);
 
     this._setInnerHandlers();
   }
 
   getTemplate() {
-    return createPopupTemplate(this._data);
+    return createPopupTemplate(this._data, this._comments);
   }
 
   restoreHandlers() {
@@ -186,6 +216,9 @@ export default class Popup extends SmartView {
     this.getElement()
       .querySelector('.film-details__control-label--favorite')
       .addEventListener('click', this._favoriteClickHandler);
+    this.getElement()
+      .querySelectorAll('.film-details__comment-delete')
+      .forEach((item) => item.addEventListener('click', this._commentDeleteHandler));
     this.getElement()
       .querySelector('.film-details__comment-input')
       .addEventListener('input', this._commentInputHandler);
@@ -235,11 +268,27 @@ export default class Popup extends SmartView {
     });
   }
 
+  _commentDeleteHandler(evt) {
+    evt.preventDefault();
+    const comment = this._comments.find((item) => item.id === evt.target.dataset.comment);
+    this._callback.deleteComment(comment);
+    this.updateData({
+      comment,
+    });
+  }
+
   setClosePopupHandler(callback) {
     this._callback.closePopup = callback;
     this.getElement()
       .querySelector('.film-details__close-btn')
       .addEventListener('click', this._closePopupHandler);
+  }
+
+  setCommentDeleteHandler(callback) {
+    this._callback.deleteComment = callback;
+    this.getElement()
+      .querySelectorAll('.film-details__comment-delete')
+      .forEach((item) => item.addEventListener('click', this._commentDeleteHandler));
   }
 
   close() {

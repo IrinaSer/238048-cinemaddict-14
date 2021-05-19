@@ -1,4 +1,3 @@
-/* global require */
 import dayjs from 'dayjs';
 import { nanoid } from 'nanoid';
 import { getRandomInteger } from '../utils/common.js';
@@ -8,8 +7,6 @@ const commentTexts = ['Interesting setting and a good cast', 'Booooooooooring', 
 const authors = ['Tim Macoveev', 'John Doe'];
 
 const emoji = ['angry', 'puke', 'sleeping', 'smile'];
-
-const dates = ['2019-12-31 23:59', '2 days ago', 'Today'];
 
 const generateCommentDate = () => {
   const date = new Date();

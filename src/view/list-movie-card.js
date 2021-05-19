@@ -11,7 +11,7 @@ const MOVIE_CARD = {
   commentsCount: 0,
 };
 
-const createListMovieCardTemplate = (movie) => {
+const createListMovieCardTemplate = (movie, comments) => {
   const {
     poster,
     title,
@@ -20,11 +20,12 @@ const createListMovieCardTemplate = (movie) => {
     duration,
     genre,
     description,
-    commentsCount,
     isToWatchlist,
     isWatched,
     isFavorite,
   } = movie;
+  const commentsCount = comments.length;
+
   return `<article class="film-card">
   <h3 class="film-card__title">${title}</h3>
   <p class="film-card__rating">${rating}</p>
@@ -48,9 +49,10 @@ const createListMovieCardTemplate = (movie) => {
 };
 
 export default class MovieCard extends AbstractView {
-  constructor(movie = MOVIE_CARD) {
+  constructor(movie = MOVIE_CARD, comments) {
     super();
     this._movie = movie;
+    this._comments = comments;
     this._showPopupHandler = this._showPopupHandler.bind(this);
     this._toWatchlistClickHandler = this._toWatchlistClickHandler.bind(this);
     this._watchedClickHandler = this._watchedClickHandler.bind(this);
@@ -58,7 +60,7 @@ export default class MovieCard extends AbstractView {
   }
 
   getTemplate() {
-    return createListMovieCardTemplate(this._movie);
+    return createListMovieCardTemplate(this._movie, this._comments);
   }
 
   _showPopupHandler(evt) {
